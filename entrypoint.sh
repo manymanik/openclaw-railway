@@ -18,15 +18,14 @@ fi
 
 # Use Railway's PORT or default to 8080
 export OPENCLAW_GATEWAY_PORT="${PORT:-8080}"
-export OPENCLAW_GATEWAY_HOST="0.0.0.0"
 
-# Create config with correct port
+# Create config
 cat > /home/node/.openclaw/config.json << EOF
 {
   "gateway": {
     "mode": "local",
     "host": "0.0.0.0",
-    "port": ${OPENCLAW_GATEWAY_PORT},
+    "port": 18789,
     "network": "lan",
     "auth": {
       "token": "$OPENCLAW_GATEWAY_TOKEN"
@@ -43,11 +42,13 @@ cat > /home/node/.openclaw/config.json << EOF
 }
 EOF
 
-echo "Config created with port ${OPENCLAW_GATEWAY_PORT}:"
-cat /home/node/.openclaw/config.json
+echo "Config created"
 
-# Start gateway
+# Start socat to forward external port to localhost
+socat TCP-LISTEN:${OPENCLAW_GATEWAY_PORT},fork,reuseaddr TCP:127.0.0.1:18789 &
+echo "Port forwarder started: 0.0.0.0:${OPENCLAW_GATEWAY_PORT} -> 127.0.0.1:18789"
+
+# Start gateway on its default internal port
 exec node dist/index.js gateway \
   --allow-unconfigured \
-  --token "$OPENCLAW_GATEWAY_TOKEN" \
-  --port "$OPENCLAW_GATEWAY_PORT"
+  --token "$OPENCLAW_GATEWAY_TOKEN"

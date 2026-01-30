@@ -1,5 +1,9 @@
 FROM ghcr.io/openclaw/openclaw:latest
 
+USER root
+RUN apt-get update && apt-get install -y socat && rm -rf /var/lib/apt/lists/*
+USER node
+
 # Set environment variables
 ENV PORT=8080
 ENV OPENCLAW_STATE_DIR=/home/node/.openclaw
