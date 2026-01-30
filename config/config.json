@@ -31,13 +31,15 @@
     "mode": "local",
     "host": "0.0.0.0",
     "port": 8080,
+    "auth": {
+      "token": "${OPENCLAW_GATEWAY_TOKEN}"
+    },
     "cors": {
       "enabled": true,
       "origins": ["*"]
     }
   },
   "security": {
-    "setupPassword": "${SETUP_PASSWORD}",
-    "adminToken": "${OPENCLAW_GATEWAY_TOKEN}"
+    "setupPassword": "${SETUP_PASSWORD}"
   }
 }
