@@ -1,14 +1,14 @@
 #!/bin/sh
 set -e
 
-# Create data directories if they don't exist (volume is mounted at runtime)
-mkdir -p /data/.openclaw /data/workspace
+# Create directories in home (user has write access)
+mkdir -p /home/node/.openclaw /home/node/workspace
 
 # Copy config if it doesn't exist yet
-if [ ! -f /data/.openclaw/config.json ]; then
-  cp /tmp/openclaw-config.json /data/.openclaw/config.json
-  echo "Copied initial config to /data/.openclaw/config.json"
+if [ ! -f /home/node/.openclaw/config.json ]; then
+  cp /tmp/openclaw-config.json /home/node/.openclaw/config.json
+  echo "Copied initial config to /home/node/.openclaw/config.json"
 fi
 
 # Start OpenClaw gateway
-exec openclaw gateway
+exec node dist/index.js gateway
