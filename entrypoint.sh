@@ -4,6 +4,10 @@ set -e
 echo "Starting OpenClaw Gateway..."
 echo "OPENCLAW_STATE_DIR: $OPENCLAW_STATE_DIR"
 
+# Clean old configs to start fresh
+rm -rf /home/node/.openclaw/*
+rm -rf /home/node/.config/openclaw 2>/dev/null || true
+
 # Create directories
 mkdir -p /home/node/.openclaw /home/node/workspace
 
