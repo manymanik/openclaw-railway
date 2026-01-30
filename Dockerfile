@@ -7,7 +7,7 @@ ENV OPENCLAW_WORKSPACE_DIR=/data/workspace
 
 # Copy config to staging location (will be moved at runtime)
 COPY config/config.json /tmp/openclaw-config.json
-COPY entrypoint.sh /entrypoint.sh
+COPY --chmod=755 entrypoint.sh /entrypoint.sh
 
 # Expose port
 EXPOSE 8080
