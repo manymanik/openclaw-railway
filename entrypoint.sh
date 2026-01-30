@@ -46,10 +46,8 @@ EOF
 echo "Config created with port ${OPENCLAW_GATEWAY_PORT}:"
 cat /home/node/.openclaw/config.json
 
-# Start gateway - force port and host via CLI
+# Start gateway
 exec node dist/index.js gateway \
   --allow-unconfigured \
   --token "$OPENCLAW_GATEWAY_TOKEN" \
-  --port "$OPENCLAW_GATEWAY_PORT" \
-  --host "0.0.0.0" \
-  --network "lan"
+  --port "$OPENCLAW_GATEWAY_PORT"
