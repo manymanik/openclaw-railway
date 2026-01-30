@@ -19,12 +19,11 @@
   },
   "channels": {
     "telegram": {
-      "enabled": true,
+      "enabled": false,
       "botToken": "${TELEGRAM_BOT_TOKEN}",
       "dmPolicy": "pairing",
-      "webhookUrl": "${RAILWAY_PUBLIC_DOMAIN}/telegram-webhook",
-      "webhookPath": "/telegram-webhook",
-      "webhookSecret": "${TELEGRAM_WEBHOOK_SECRET}"
+      "webhookUrl": "https://${RAILWAY_PUBLIC_DOMAIN}/telegram-webhook",
+      "webhookPath": "/telegram-webhook"
     }
   },
   "gateway": {

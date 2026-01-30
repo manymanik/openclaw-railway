@@ -10,8 +10,8 @@ if [ -z "$OPENCLAW_GATEWAY_TOKEN" ]; then
   echo "Generated OPENCLAW_GATEWAY_TOKEN: $OPENCLAW_GATEWAY_TOKEN"
 fi
 
-# Copy and process config if it doesn't exist yet
-if [ ! -f /home/node/.openclaw/config.json ]; then
+# Always regenerate config to pick up env var changes
+if true; then
   # Substitute environment variables using sed
   sed -e "s|\${OPENROUTER_API_KEY}|${OPENROUTER_API_KEY}|g" \
       -e "s|\${TELEGRAM_BOT_TOKEN}|${TELEGRAM_BOT_TOKEN}|g" \
