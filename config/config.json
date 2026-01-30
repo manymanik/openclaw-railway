@@ -1,0 +1,42 @@
+{
+  "$schema": "https://docs.openclaw.ai/schema/config.json",
+  "models": {
+    "default": "openrouter/moonshotai/kimi-k2.5",
+    "providers": {
+      "openrouter": {
+        "apiKey": "${OPENROUTER_API_KEY}",
+        "baseUrl": "https://openrouter.ai/api/v1",
+        "defaultParams": {
+          "provider": {
+            "order": ["atlas-cloud"],
+            "allow_fallbacks": false,
+            "zdr": true,
+            "data_collection": "deny"
+          }
+        }
+      }
+    }
+  },
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "${TELEGRAM_BOT_TOKEN}",
+      "dmPolicy": "pairing",
+      "webhookUrl": "${RAILWAY_PUBLIC_DOMAIN}/telegram-webhook",
+      "webhookPath": "/telegram-webhook",
+      "webhookSecret": "${TELEGRAM_WEBHOOK_SECRET}"
+    }
+  },
+  "gateway": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "cors": {
+      "enabled": true,
+      "origins": ["*"]
+    }
+  },
+  "security": {
+    "setupPassword": "${SETUP_PASSWORD}",
+    "adminToken": "${OPENCLAW_GATEWAY_TOKEN}"
+  }
+}
