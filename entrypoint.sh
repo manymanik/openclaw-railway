@@ -2,7 +2,6 @@
 set -e
 
 echo "Starting OpenClaw Gateway..."
-echo "OPENCLAW_STATE_DIR: $OPENCLAW_STATE_DIR"
 
 # Clean old configs to start fresh
 rm -rf /home/node/.openclaw/*
@@ -17,13 +16,18 @@ if [ -z "$OPENCLAW_GATEWAY_TOKEN" ]; then
   echo "Generated OPENCLAW_GATEWAY_TOKEN: $OPENCLAW_GATEWAY_TOKEN"
 fi
 
-# Create minimal config
+# Use Railway's PORT or default to 8080
+export OPENCLAW_GATEWAY_PORT="${PORT:-8080}"
+export OPENCLAW_GATEWAY_HOST="0.0.0.0"
+
+# Create config with correct port
 cat > /home/node/.openclaw/config.json << EOF
 {
   "gateway": {
     "mode": "local",
     "host": "0.0.0.0",
-    "port": 8080,
+    "port": ${OPENCLAW_GATEWAY_PORT},
+    "network": "lan",
     "auth": {
       "token": "$OPENCLAW_GATEWAY_TOKEN"
     }
@@ -39,8 +43,13 @@ cat > /home/node/.openclaw/config.json << EOF
 }
 EOF
 
-echo "Config created:"
+echo "Config created with port ${OPENCLAW_GATEWAY_PORT}:"
 cat /home/node/.openclaw/config.json
 
-# Start gateway
-exec node dist/index.js gateway --allow-unconfigured --token "$OPENCLAW_GATEWAY_TOKEN"
+# Start gateway - force port and host via CLI
+exec node dist/index.js gateway \
+  --allow-unconfigured \
+  --token "$OPENCLAW_GATEWAY_TOKEN" \
+  --port "$OPENCLAW_GATEWAY_PORT" \
+  --host "0.0.0.0" \
+  --network "lan"
