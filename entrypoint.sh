@@ -11,4 +11,4 @@ if [ ! -f /home/node/.openclaw/config.json ]; then
 fi
 
 # Start OpenClaw gateway
-exec node dist/index.js gateway
+exec node dist/index.js gateway --allow-unconfigured
