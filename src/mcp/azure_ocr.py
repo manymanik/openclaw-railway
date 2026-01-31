@@ -33,41 +33,58 @@ def get_vision_client():
 
     return ComputerVisionClient(endpoint, CognitiveServicesCredentials(key))
 
-def extract_text_from_image(client, image_bytes):
-    """Extract text from image bytes using Azure OCR."""
+def extract_text_from_image(client, image_bytes, max_retries=3):
+    """Extract text from image bytes using Azure OCR with retry logic."""
     from azure.cognitiveservices.vision.computervision.models import OperationStatusCodes
+    from azure.core.exceptions import HttpResponseError
     import io
 
-    stream = io.BytesIO(image_bytes)
+    for attempt in range(max_retries):
+        try:
+            stream = io.BytesIO(image_bytes)
 
-    # Call the Read API
-    read_response = client.read_in_stream(stream, raw=True)
+            # Call the Read API
+            read_response = client.read_in_stream(stream, raw=True)
 
-    # Get operation location
-    operation_location = read_response.headers["Operation-Location"]
-    operation_id = operation_location.split("/")[-1]
+            # Get operation location
+            operation_location = read_response.headers["Operation-Location"]
+            operation_id = operation_location.split("/")[-1]
 
-    # Wait for result (with timeout)
-    max_wait = 60  # seconds
-    waited = 0
-    while waited < max_wait:
-        result = client.get_read_result(operation_id)
-        if result.status not in [OperationStatusCodes.running, OperationStatusCodes.not_started]:
-            break
-        time.sleep(0.5)
-        waited += 0.5
+            # Wait for result (with timeout)
+            max_wait = 60  # seconds
+            waited = 0
+            while waited < max_wait:
+                result = client.get_read_result(operation_id)
+                if result.status not in [OperationStatusCodes.running, OperationStatusCodes.not_started]:
+                    break
+                time.sleep(0.5)
+                waited += 0.5
 
-    if result.status != OperationStatusCodes.succeeded:
-        print(f"Error: OCR operation failed with status: {result.status}", file=sys.stderr)
-        return ""
+            if result.status != OperationStatusCodes.succeeded:
+                print(f"Error: OCR operation failed with status: {result.status}", file=sys.stderr)
+                return ""
 
-    # Extract text
-    text_results = []
-    for page in result.analyze_result.read_results:
-        for line in page.lines:
-            text_results.append(line.text)
+            # Extract text
+            text_results = []
+            for page in result.analyze_result.read_results:
+                for line in page.lines:
+                    text_results.append(line.text)
 
-    return "\n".join(text_results)
+            return "\n".join(text_results)
+
+        except Exception as e:
+            error_str = str(e).lower()
+            if "429" in str(e) or "too many requests" in error_str or "rate" in error_str:
+                wait_time = 30 * (attempt + 1)  # 30s, 60s, 90s
+                print(f"Rate limited, waiting {wait_time}s before retry {attempt + 1}/{max_retries}...", file=sys.stderr)
+                time.sleep(wait_time)
+            else:
+                print(f"Error on attempt {attempt + 1}: {e}", file=sys.stderr)
+                if attempt == max_retries - 1:
+                    raise
+                time.sleep(10)
+
+    return ""
 
 def process_pdf(pdf_path):
     """Convert PDF pages to images and OCR each page."""
@@ -92,9 +109,9 @@ def process_pdf(pdf_path):
         if page_text:
             all_text.append(f"--- Page {page_num + 1} ---\n{page_text}")
 
-        # Rate limit: wait 3 seconds between pages to avoid Azure throttling
+        # Rate limit: wait 5 seconds between pages to avoid Azure throttling
         if page_num < total_pages - 1:
-            time.sleep(3)
+            time.sleep(5)
 
     doc.close()
     return "\n\n".join(all_text)
