@@ -92,6 +92,10 @@ def process_pdf(pdf_path):
         if page_text:
             all_text.append(f"--- Page {page_num + 1} ---\n{page_text}")
 
+        # Rate limit: wait 3 seconds between pages to avoid Azure throttling
+        if page_num < total_pages - 1:
+            time.sleep(3)
+
     doc.close()
     return "\n\n".join(all_text)
 
