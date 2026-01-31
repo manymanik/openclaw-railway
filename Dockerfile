@@ -55,12 +55,16 @@ RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/dist/entry.js "$@"'
 
 COPY src ./src
 
-# Install Python MCP server dependencies
+# Install Python OCR tool dependencies
 RUN python3 -m venv /app/mcp-venv \
   && /app/mcp-venv/bin/pip install --no-cache-dir -r /app/src/mcp/requirements.txt \
-  && chmod +x /app/src/mcp/azure_ocr_mcp.py
+  && chmod +x /app/src/mcp/azure_ocr.py
+
+# Copy skills to workspace (will be used by OpenClaw)
+COPY skills /app/skills
+COPY --chmod=755 entrypoint.sh /app/entrypoint.sh
 
 ENV OPENCLAW_PUBLIC_PORT=8080
 ENV PORT=8080
 EXPOSE 8080
-CMD ["node", "src/server.js"]
+CMD ["/app/entrypoint.sh"]
