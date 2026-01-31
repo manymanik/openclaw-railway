@@ -17,7 +17,7 @@ RUN corepack enable
 
 WORKDIR /openclaw
 
-ARG OPENCLAW_GIT_REF=main
+ARG OPENCLAW_GIT_REF=v2026.1.29
 RUN git clone --depth 1 --branch "${OPENCLAW_GIT_REF}" https://github.com/openclaw/openclaw.git .
 
 RUN set -eux; \
@@ -28,6 +28,8 @@ RUN set -eux; \
 
 RUN pnpm install --no-frozen-lockfile
 RUN pnpm build
+# Verify build succeeded
+RUN test -f dist/entry.js || (echo "ERROR: dist/entry.js not found after build" && exit 1)
 ENV OPENCLAW_PREFER_PNPM=1
 RUN pnpm ui:install && pnpm ui:build
 
@@ -50,7 +52,7 @@ RUN npm install --omit=dev && npm cache clean --force
 
 COPY --from=openclaw-build /openclaw /openclaw
 
-RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/openclaw.mjs "$@"' > /usr/local/bin/openclaw \
+RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/dist/entry.js "$@"' > /usr/local/bin/openclaw \
   && chmod +x /usr/local/bin/openclaw
 
 COPY src ./src
