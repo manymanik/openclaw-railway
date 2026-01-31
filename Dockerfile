@@ -38,6 +38,9 @@ ENV NODE_ENV=production
 RUN apt-get update \
   && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
+    python3 \
+    python3-pip \
+    python3-venv \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -51,6 +54,11 @@ RUN printf '%s\n' '#!/usr/bin/env bash' 'exec node /openclaw/dist/entry.js "$@"'
   && chmod +x /usr/local/bin/openclaw
 
 COPY src ./src
+
+# Install Python MCP server dependencies
+RUN python3 -m venv /app/mcp-venv \
+  && /app/mcp-venv/bin/pip install --no-cache-dir -r /app/src/mcp/requirements.txt \
+  && chmod +x /app/src/mcp/azure_ocr_mcp.py
 
 ENV OPENCLAW_PUBLIC_PORT=8080
 ENV PORT=8080
